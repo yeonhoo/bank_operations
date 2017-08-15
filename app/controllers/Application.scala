@@ -20,7 +20,7 @@ class HomeController @Inject()(cc:ControllerComponents) extends AbstractControll
       },
       operation => {
         Operation.save(operation)
-        Ok(Json.obj("status" -> "Ok", "message" -> ("operation : " + operation.opType +
+        Ok(Json.obj("status" -> "Ok", "message" -> ("operation : " + operation.op_type +
           ", description : " + operation.description +
           ", amount : " + operation.amount +
           ", date : " + operation.date + " saved." )))
@@ -39,8 +39,8 @@ class HomeController @Inject()(cc:ControllerComponents) extends AbstractControll
 
     val operations = Operation.getList
     //println(operations)
-    val computedBalance = operations.filter(_.accNum == account).foldLeft(BigDecimal(0)){ (balance, operation) =>
-      val amount = operation.opType match {
+    val computedBalance = operations.filter(_.acc_num == account).foldLeft(BigDecimal(0)){ (balance, operation) =>
+      val amount = operation.op_type match {
         case "Credit" => operation.amount
         case "Debit" => -(operation.amount)
       }
@@ -54,9 +54,9 @@ class HomeController @Inject()(cc:ControllerComponents) extends AbstractControll
     val operations = Operation.getList
 
     val computedBalance = operations.filter{ op =>
-      op.accNum == account && op.date.compareTo(date) <= 0
+      op.acc_num == account && op.date.compareTo(date) <= 0
     }.foldLeft(BigDecimal(0)) { (balance, operation) =>
-      val amount = operation.opType match {
+      val amount = operation.op_type match {
         case "Credit" => operation.amount
         case "Debit" => -(operation.amount)
       }
@@ -69,12 +69,11 @@ class HomeController @Inject()(cc:ControllerComponents) extends AbstractControll
 
   def statement(account: String, from: String, to: String) = Action {
     val operations = Operation.getList
-
     val dateFrom = LocalDate.parse(from, dateFormat)
     val dateTo = LocalDate.parse(to, dateFormat)
 
     val data = operations.filter { op =>
-      op.accNum == account && op.date.compareTo(dateFrom) >= 0 && op.date.compareTo(dateTo) <= 0
+      op.acc_num == account && op.date.compareTo(dateFrom) >= 0 && op.date.compareTo(dateTo) <= 0
     }.groupBy(_.date).map {
       case (date, xs) => {
         SimpleInfoByDate(date, xs.map(e => SimpleInfo(e.description, e.amount.setScale(2, RoundingMode.HALF_EVEN))), balanceByDate(account, date))
@@ -85,10 +84,39 @@ class HomeController @Inject()(cc:ControllerComponents) extends AbstractControll
   }
 
 
+  def debtPeriod2(account: String) = Action {
+    val operations = Operation.getList
+
+    val result = operations.filter(_.acc_num == account)
+      .groupBy( op => op.date)
+      .map {case (date, _) => (date, balanceByDate(account, date))}
+      .toList.sortWith( (date1, date2) => date1._1.compareTo(date2._1) <= 0)
+      .sliding(2).filter{ p=>
+        (p.lift(0).get._2 < 0 && p.lift(1).get._2 > 0) ||
+        (p.lift(0).get._2 < 0 && p.lift(1).get._2 < 0)
+      }.toList
+
+    val debtPeriods = result.map { e =>
+      val principal = e(0)._2.abs
+      val startDate = e(0)._1
+      val endDate = Some(e(1)._1.minusDays(1))
+      DebtPeriod(principal, startDate, endDate)}
+
+    val lastBalance = result.last.last._2
+    val lastDeptStartDate = result.last.last._1
+
+    val finalResult =
+      if (lastBalance < 0)
+        debtPeriods :+ DebtPeriod(lastBalance.abs, lastDeptStartDate, None)
+      else
+        debtPeriods
+
+    Ok(Json.toJson(finalResult))
+  }
   def debtPeriod(account: String) = Action {
     val operations = Operation.getList
 
-    val result = operations.filter(_.accNum == account)
+    val result = operations.filter(_.acc_num == account)
       .groupBy( op => op.date)
       .map {case (date, _) => date}
       .toList.sortWith( (date1, date2) => date1.compareTo(date2) <= 0)
@@ -96,7 +124,6 @@ class HomeController @Inject()(cc:ControllerComponents) extends AbstractControll
       .sliding(2).filter{ p=>
       //println("primeiro : " + p.lift(0).get._2 + "  Date : " + p.lift(0).get._1)
       //println("segundo : " + p.lift(1).get._2 + "  Date : " + p.lift(1).get._1)
-
       (p.lift(0).get._2 < 0 && p.lift(1).get._2 > 0) ||
         (p.lift(0).get._2 < 0 && p.lift(1).get._2 < 0)
     }
@@ -106,14 +133,10 @@ class HomeController @Inject()(cc:ControllerComponents) extends AbstractControll
     //println("last balance  mesmo ? : " + lastBalance)
 
     val finalResult = result.map{m =>
-      DebtPeriod(m(0)._1, Some(m(1)._1.minusDays(1)), m(0)._2) } :+ DebtPeriod(lastBalance._1, None, lastBalance._2)
+      DebtPeriod(m(0)._2.abs, m(0)._1, Some(m(1)._1.minusDays(1)) ) } :+ DebtPeriod(lastBalance._2.abs, lastBalance._1, None)
 
     Ok(Json.toJson(finalResult))
 
   }
-
-
-  def test = Action { Ok("ok") }
-
 }
 

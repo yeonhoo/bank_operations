@@ -15,29 +15,16 @@ class HomeControllerSpec extends PlaySpec with GuiceOneAppPerTest {
 
   "HomeController" should {
 
-    "return balance for account 12345" in {
-      val request = FakeRequest(GET, "/balance/12345").withHeaders(HOST -> "localhost:9000",
-        "Content-type" -> "application/json")
-      val balance = route(app, request).get
-
-      val jsonBody = contentAsJson(balance)
-
-      jsonBody.toString() mustEqual ("-528.57")
-      //contentAsString(balance) must include ("1234")
-    }
-
-
-    "save POST request" in {
+    "add new Credit operation and save" in {
       val request = FakeRequest("POST", "/operation").withJsonBody(
         Json.parse(
           """
-            |{"opType": "Credit",
+            |{"op_type": "Credit",
             |"account": "12345",
             |"description": "deposit",
             |"amount": 200,
             |"date": "2017-10-17"}
           """.stripMargin))
-
 
       println(request.body)
 
@@ -51,6 +38,19 @@ class HomeControllerSpec extends PlaySpec with GuiceOneAppPerTest {
       (jsonBody \ "message").as[String] must include("amount : 200")
       (jsonBody \ "message").as[String] must include("date : 2017-10-17")
 
+    }
+
+
+
+    "return balance for account 12345" in {
+      val request = FakeRequest(GET, "/balance/12345").withHeaders(HOST -> "localhost:9000",
+        "Content-type" -> "application/json")
+      val balance = route(app, request).get
+
+      val jsonBody = contentAsJson(balance)
+
+      jsonBody.toString() mustEqual ("-528.57")
+      //contentAsString(balance) must include ("1234")
     }
 
 
@@ -103,30 +103,30 @@ class HomeControllerSpec extends PlaySpec with GuiceOneAppPerTest {
       val firstElement = validated.get.lift(0).get
 
       firstElement mustBe DebtPeriod(
+        -28.57,
         LocalDate.parse("18102017", dateFormat),
-        Some(LocalDate.parse("24102017", dateFormat)),
-        -28.57)
+        Some(LocalDate.parse("24102017", dateFormat)))
 
       val secondElement = validated.get.lift(1).get
 
       secondElement mustBe DebtPeriod(
+        -228.57,
         LocalDate.parse("30102017", dateFormat),
-        Some(LocalDate.parse("02112017", dateFormat)),
-        -228.57)
+        Some(LocalDate.parse("02112017", dateFormat)))
 
       val thirdElement = validated.get.lift(2).get
 
       thirdElement mustBe DebtPeriod(
+        -628.57,
         LocalDate.parse("03112017", dateFormat),
-        Some(LocalDate.parse("04112017", dateFormat)),
-        -628.57)
+        Some(LocalDate.parse("04112017", dateFormat)))
 
       val fourthElement = validated.get.lift(3).get
 
       fourthElement mustBe DebtPeriod(
+        -528.57,
         LocalDate.parse("05112017", dateFormat),
-        None,
-        -528.57)
+        None)
     }
   }
 }

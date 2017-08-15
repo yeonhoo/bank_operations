@@ -7,10 +7,10 @@ import play.api.libs.json.{JsPath, Reads, Writes}
 import play.api.libs.json.Reads._
 import play.api.libs.functional.syntax._
 
-case class Operation(opType: String, accNum: String, description: String, amount: BigDecimal, date: LocalDate)
+case class Operation(op_type: String, acc_num: String, description: String, amount: BigDecimal, date: LocalDate)
 case class SimpleInfo(description: String, amount: BigDecimal)
 case class SimpleInfoByDate(date: LocalDate, info: List[SimpleInfo], balance: BigDecimal)
-case class DebtPeriod(start: LocalDate, end: Option[LocalDate], principal: BigDecimal)
+case class DebtPeriod(principal: BigDecimal, start: LocalDate, end: Option[LocalDate])
 
 object Converters {
 
@@ -26,7 +26,7 @@ object Converters {
     )(unlift(SimpleInfoByDate.unapply))
 
   implicit val operationWrites: Writes[Operation] = (
-    (JsPath \ "opType").write[String] and
+    (JsPath \ "op_type").write[String] and
       (JsPath \ "account").write[String] and
       (JsPath \ "description").write[String] and
       (JsPath \ "amount").write[BigDecimal] and
@@ -34,13 +34,13 @@ object Converters {
     )(unlift(Operation.unapply))
 
   implicit val debtPeriodWrites: Writes[DebtPeriod] = (
-    (JsPath \ "start").write[LocalDate] and
-      (JsPath \ "end").write[Option[LocalDate]] and
-      (JsPath \ "principal").write[BigDecimal]
+    (JsPath \ "principal").write[BigDecimal] and
+      (JsPath \ "start").write[LocalDate] and
+      (JsPath \ "end").write[Option[LocalDate]]
     )(unlift(DebtPeriod.unapply))
 
   implicit val operationReads: Reads[Operation] = (
-    (JsPath \ "opType").read[String] and
+    (JsPath \ "op_type").read[String] and
       (JsPath \ "account").read[String] and
       (JsPath \ "description").read[String] and
       (JsPath \ "amount").read[BigDecimal] and
@@ -59,11 +59,10 @@ object Converters {
     )(SimpleInfoByDate.apply _)
 
   implicit val debtPeriodReads: Reads[DebtPeriod] = (
-    (JsPath \ "start").read[LocalDate] and
-      (JsPath \ "end").readNullable[LocalDate] and
-      (JsPath \ "principal").read[BigDecimal]
+    (JsPath \ "principal").read[BigDecimal] and
+      (JsPath \ "start").read[LocalDate] and
+      (JsPath \ "end").readNullable[LocalDate]
     )(DebtPeriod.apply _)
-
 }
 
 object Operation {

@@ -1,23 +1,8 @@
-# Routes
-# This file defines all application routes (Higher priority routes first)
-# ~~~~
-
-
-
-# Operation
-
-#GET     /operation          controllers.HomeController.listOperations
-POST    /operation          controllers.HomeController.saveOperation
-
-# poderia fazer
-#POST   /operation/credit/:account
-
+POST    /operation                                  controllers.HomeController.saveOperation
 GET     /balance/:account                           controllers.HomeController.balance(account: String)
-#GET     /credit/:account                            controllers.HomeController.credit(account: String)
-#GET     /debit/:account                             controllers.HomeController.debit(account: String)
 GET     /statement/:account/:dateFrom/:dateTo       controllers.HomeController.statement(account: String, dateFrom: String, dateTo: String)
-
 GET     /debt/:account                              controllers.HomeController.debtPeriod(account: String)
+GET     /debt2/:account                              controllers.HomeController.debtPeriod2(account: String)
 
 
 # Map static resources from the /public folder to the /assets URL path

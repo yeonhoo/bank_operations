@@ -9,7 +9,9 @@ case class Operation(opType: String, accNum: String, description: String, amount
 case class SimpleInfo(description: String, amount: Double)
 case class SimpleInfoByDate(date: LocalDate, info: List[SimpleInfo])
 
-case class DebtPeriod(start: LocalDate, end: Option[LocalDate], principal: Double)
+//case class DebtPeriod(start: LocalDate, end: Option[LocalDate], principal: Double)
+case class DebtPeriod(principal: BigDecimal, start: LocalDate, end: Option[LocalDate])
+
 
 object Operation {
 
@@ -102,10 +104,9 @@ implicit val simpleInfobyDateWrites: Writes[SimpleInfoByDate] = (
   )(unlift(SimpleInfoByDate.unapply))
 
 implicit val debtPeriodWrites: Writes[DebtPeriod] = (
-  (JsPath \ "start").write[LocalDate] and
-    (JsPath \ "end").write[Option[LocalDate]] and
-    (JsPath \ "principal").write[Double]
-
+  (JsPath \ "principal").write[BigDecimal] and
+    (JsPath \ "start").write[LocalDate] and
+    (JsPath \ "end").write[Option[LocalDate]]
   )(unlift(DebtPeriod.unapply))
 
 
@@ -146,6 +147,58 @@ def debtTest(account: String) = {
 }
 
 
+
+def debt2(account: String) = {
+  val operations = Operation.list
+  //println(operations)
+
+  val result = operations.filter(_.accNum == account)
+    .groupBy( op => op.date)
+    .map {
+      case (date, _) =>
+        (date, balanceByDate(account, date.format(DateTimeFormatter.ofPattern("ddMMyyyy"))))
+    }.toList.sortWith( (date1, date2) => date1._1.compareTo(date2._1) <= 0)
+      .sliding(2).filter{ p=>
+
+    (p.lift(0).get._2 < 0 && p.lift(1).get._2 > 0) ||
+      (p.lift(0).get._2 < 0 && p.lift(1).get._2 < 0)
+  }.map( e => DebtPeriod(e(0)._2, e(0)._1, Some(e(1)._1.minusDays(1)))).toList
+
+
+  val finalResult =
+    if (result.last.principal < 0)
+      result :+ DebtPeriod(result.last.principal, result.last.start, None)
+    else
+      result
+
+  Json.toJson(finalResult)
+
+}
+
+debt2("12345")
+
+def debt3(account: String) = {
+  val operations = Operation.list
+
+  val result = operations.filter(_.accNum == account)
+    .groupBy( op => op.date)
+    .map {
+      case (date, _) => date
+    }.toList.sortWith( (date1, date2) => date1.compareTo(date2) <= 0)
+    .map(date => Tuple2(date, balanceByDate(account, date.format(DateTimeFormatter.ofPattern("ddMMyyyy")))))
+    //.toList.sortWith( (op1, op2) => op1._1.compareTo(op2._1) <= 0)
+    .sliding(2).filter{ p=>
+    println("primeiro : " + p.lift(0).get._2 + "  Date : " + p.lift(0).get._1)
+    println("segundo : " + p.lift(1).get._2 + "  Date : " + p.lift(1).get._1)
+
+    (p.lift(0).get._2 < 0 && p.lift(1).get._2 > 0) ||
+      (p.lift(0).get._2 < 0 && p.lift(1).get._2 < 0)
+  }.flatten
+
+}
+
+
+
 def debt(account: String) = {
   val operations = Operation.list
 
@@ -166,10 +219,12 @@ def debt(account: String) = {
     .flatten.grouped(2).toList
 
   val lastBalance = result.last.last
+  println("result.last.  : " + result.last)
+
   println("last balance  mesmo ? : " + lastBalance)
 
   val finalResult = result.map{m =>
-      DebtPeriod(m(0)._1, Some(m(1)._1.minusDays(1)), m(0)._2) } :+ DebtPeriod(lastBalance._1, None, lastBalance._2)
+      DebtPeriod(m(0)._2, m(0)._1, Some(m(1)._1.minusDays(1)) ) } :+ DebtPeriod(lastBalance._2, lastBalance._1, None)
 
   Json.toJson(finalResult)
 }
