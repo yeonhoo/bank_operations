@@ -16,7 +16,7 @@ class HomeController @Inject()(cc:ControllerComponents) extends AbstractControll
     val operationResult = request.body.validate[Operation](operationReads)
     operationResult.fold(
       errors => {
-        BadRequest(Json.obj("status" -> "KO", "message" -> JsError.toJson(errors)))
+        BadRequest(Json.obj("status" -> "Error", "message" -> JsError.toJson(errors)))
       },
       operation => {
         Operation.save(operation)
@@ -92,9 +92,20 @@ class HomeController @Inject()(cc:ControllerComponents) extends AbstractControll
       .map {case (date, _) => (date, balanceByDate(account, date))}
       .toList.sortWith( (date1, date2) => date1._1.compareTo(date2._1) <= 0)
       .sliding(2).filter{ p=>
-        (p.lift(0).get._2 < 0 && p.lift(1).get._2 > 0) ||
-        (p.lift(0).get._2 < 0 && p.lift(1).get._2 < 0)
-      }.toList
+        println("p.list 0 => " + p.lift(0) + "p.list 1 => " + p.lift(1))
+        println("p.list 0 => " + p.lift(0) + "p.list 1 getOrElse => " + p.lift(1))
+
+      val firstBalance = p.lift(0).get._2
+        val secondBalance = p.lift(1).getOrElse(p.lift(0).get)._2
+        (firstBalance < 0 && secondBalance > 0) ||
+        (firstBalance < 0 && secondBalance < 0)
+      }.toList.
+
+    println(result)
+
+    println("first El : " + result.lift(0))
+    //println("second El : " + result.lift(0).get.lift(1))
+
 
     val debtPeriods = result.map { e =>
       val principal = e(0)._2.abs

@@ -94,6 +94,48 @@ object Operation {
       ),
       Operation(
         "Debit",
+        "11111",
+        "Purchase on Ebay",
+        120.00,
+        LocalDate.parse("16102017", DateTimeFormatter.ofPattern("ddMMyyyy"))
+      ),
+      Operation(
+        "Debit",
+        "11111",
+        "Purchase on Amazon",
+        200.00,
+        LocalDate.parse("16102017", DateTimeFormatter.ofPattern("ddMMyyyy"))
+      ),
+      Operation(
+        "Debit",
+        "11111",
+        "Withdrawal",
+        200.00,
+        LocalDate.parse("17102017", DateTimeFormatter.ofPattern("ddMMyyyy"))
+      ),
+      Operation(
+        "Debit",
+        "22222",
+        "Purchase on Amazon",
+        200.00,
+        LocalDate.parse("16102017", DateTimeFormatter.ofPattern("ddMMyyyy"))
+      ),
+      Operation(
+        "Credit",
+        "22222",
+        "Deposit",
+        500.00,
+        LocalDate.parse("16102017", DateTimeFormatter.ofPattern("ddMMyyyy"))
+      ),
+      Operation(
+        "Debit",
+        "54321",
+        "Purchase on Uber",
+        25.65,
+        LocalDate.parse("16102017", DateTimeFormatter.ofPattern("ddMMyyyy"))
+      ),
+      Operation(
+        "Debit",
         "12345",
         "Purchase on Uber",
         45.23,
@@ -127,7 +169,7 @@ object Operation {
       Operation(
         "Debit",
         "12345",
-        "Deposit",
+        "Withdrawal",
         300.00,
         LocalDate.parse("30102017", DateTimeFormatter.ofPattern("ddMMyyyy"))
       ),
@@ -135,7 +177,7 @@ object Operation {
       Operation(
         "Debit",
         "12345",
-        "Deposit",
+        "Withdrawal",
         400.00,
         LocalDate.parse("03112017", DateTimeFormatter.ofPattern("ddMMyyyy"))
       ),
