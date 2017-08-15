@@ -25,14 +25,14 @@ This is the solution for a exercise proposed by Nubank for software engineer pos
 ## Endpoint request example
 
 * POST /opertions
-    * input :
+    * request :
     
 ```
 #!json    
 {"op_type": "Credit", "account": "12345", "description": "deposit","amount": 200, "date": "2017-10-17"}
 ```
 
-* output :
+* response :
 
 
 ```
@@ -44,13 +44,13 @@ This is the solution for a exercise proposed by Nubank for software engineer pos
 ```
 
 * GET /balance/:account
-    * input : /balance/12345
-    * output : -328.57
+    * request : /balance/12345
+    * response : -328.57
 
 * GET /statement/:account/:dateFrom/:dateTo
-    * input : /statement/12345/15102017/17102017
+    * request : /statement/12345/15102017/17102017
     
-    * output : 
+    * response : 
 ```
 #!json
 [
@@ -97,7 +97,7 @@ This is the solution for a exercise proposed by Nubank for software engineer pos
 * GET /debt/:account
     * input : /debt/12345
     
-    * output : 
+    * response : 
 ```
 #!json
 [
