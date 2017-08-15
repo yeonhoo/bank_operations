@@ -27,18 +27,21 @@ This is the solution for a exercise proposed by Nubank for software engineer pos
 
 * POST /opertions
     * input :
+    
 ```
 #!json    
-        {"op_type": "Credit", "account": "12345", "description": "deposit","amount": 200, "date": "2017-10-17"}
+{"op_type": "Credit", "account": "12345", "description": "deposit","amount": 200, "date": "2017-10-17"}
 ```
 
-    * output :
+* output :
+
+
 ```
 #!json
-        {
-            "status": "Ok", 
-            "message": "operation : Credit, description : deposit, amount : 200, date : 2017-10-17 saved."
-        }
+{
+    "status": "Ok", 
+    "message": "operation : Credit, description : deposit, amount : 200, date : 2017-10-17 saved."
+}
 ```
 
 * GET /balance/:account
