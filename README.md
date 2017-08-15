@@ -43,6 +43,8 @@ This is the solution for a exercise proposed by Nubank for software engineer pos
     * input : /statement/12345/15102017/17102017
     
     * output : 
+```
+#!json
 [
     {
         "date": "2017-10-15",
@@ -83,7 +85,7 @@ This is the solution for a exercise proposed by Nubank for software engineer pos
         "balance": 971.43
     }
 ]
-
+```
 * GET /debt/:account
     * input : /debt/12345
     
