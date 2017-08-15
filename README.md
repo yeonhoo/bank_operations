@@ -10,17 +10,19 @@ This is the solution for a exercise proposed by Nubank for software engineer pos
 
 ## Endpoints
 
-* POST /opertions
-    * Insert a new operation
-	
-* GET /balance/:account
-    * Get the balance for the given "account"
+### Insert a new operation
+#### POST /opertions
 
-* GET /statement/:account/:dateFrom/:dateTo
-    * Get the bank statement for the given "account" and the period that is specified by "dateFrom" and "dateTo" 
+### Get the balance for the given "account"
+#### GET /balance/:account
 
-* GET /debt/:account
-    * Get debt period for the given "account" 
+
+### Get the bank statement for the given "account" and the period that is specified by "dateFrom" and "dateTo" 
+#### GET /statement/:account/:dateFrom/:dateTo
+
+### Get debt period for the given "account" 
+#### GET /debt/:account
+
 
 ## Endpoint request example
 
