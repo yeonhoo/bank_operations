@@ -2,147 +2,82 @@ package controllers
 
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
-
 import com.google.inject.Inject
-import play.api._
-import play.api.mvc._
 import play.api.mvc._
 import play.api.libs.json._
-import play.api.libs.functional.syntax._
-import play.api.libs.json._
-import play.api.libs.json.Reads._
-import play.api.libs.functional.syntax._
+import scala.math.BigDecimal.RoundingMode
+import models.Converters._
+import models._
 
 
 class HomeController @Inject()(cc:ControllerComponents) extends AbstractController(cc)  {
 
-
-  implicit val simpleInfo: Writes[SimpleInfo] = (
-    (JsPath \ "description").write[String] and
-      (JsPath \ "amount").write[Double]
-    )(unlift(SimpleInfo.unapply))
-
-
-  implicit val simpleInfobyDateWrites: Writes[SimpleInfoByDate] = (
-    (JsPath \ "date").write[LocalDate] and
-      (JsPath \ "info").write[List[SimpleInfo]] and
-      (JsPath \ "balance").write[Double]
-    )(unlift(SimpleInfoByDate.unapply))
-
-  implicit val operationWrites: Writes[Operation] = (
-    (JsPath \ "opType").write[String] and
-      (JsPath \ "account").write[String] and
-      (JsPath \ "description").write[String] and
-      (JsPath \ "amount").write[Double] and
-      (JsPath \ "date").write[LocalDate]
-    )(unlift(Operation.unapply))
-
-
-
-  implicit val accountReads: Reads[Account] = (
-    (JsPath \ "account").read[String] and
-      (JsPath \ "balance").read[Double]
-  )(Account.apply _)
-
-  implicit val operationReads: Reads[Operation] = (
-    (JsPath \ "opType").read[String] and
-      (JsPath \ "account").read[String] and
-      (JsPath \ "description").read[String] and
-      (JsPath \ "amount").read[Double] and
-      (JsPath \ "date").read[LocalDate]
-  )(Operation.apply _)
-
-/*  def saveOperation = Action(parse.json) { request =>
-    val operationResult = request.body.validate[Operation]
+  def saveOperation = Action(parse.json) { request =>
+    val operationResult = request.body.validate[Operation](operationReads)
     operationResult.fold(
       errors => {
         BadRequest(Json.obj("status" -> "KO", "message" -> JsError.toJson(errors)))
       },
       operation => {
         Operation.save(operation)
-        Ok(Json.obj("status" -> "Ok", "message" -> ("Operation :" + operation.opType + ", description :" +
-          operation.description + " saved.")))
+        Ok(Json.obj("status" -> "Ok", "message" -> ("operation : " + operation.opType +
+          ", description : " + operation.description +
+          ", amount : " + operation.amount +
+          ", date : " + operation.date + " saved." )))
       }
     )
-  }*/
+  }
+
+  val dateFormat = DateTimeFormatter.ofPattern("ddMMyyyy")
 
   def listOperations = Action {
-    val json = Json.toJson(Operation.list)
+    val json = Json.toJson(Operation.getList)
     Ok(json)
   }
 
   def balance(account: String) = Action { request =>
 
-    val operations = Operation.list
-
-    println(operations)
-
-    val calcBalance = operations.filter(_.accNum == account).foldLeft(0.0){ (balance, operation) =>
+    val operations = Operation.getList
+    //println(operations)
+    val computedBalance = operations.filter(_.accNum == account).foldLeft(BigDecimal(0)){ (balance, operation) =>
       val amount = operation.opType match {
         case "Credit" => operation.amount
         case "Debit" => -(operation.amount)
       }
-      println("Date : " + operation.date + " actual balance : " + balance + " amount to sum : " + amount )
+      //println("Date : " + operation.date + " actual balance : " + balance + " amount to sum : " + amount )
       balance + amount
     }
-
-    Ok(Json.toJson(calcBalance))
-  }
-
-
-  def balanceByDate(account: String, dateStr: String) = Action { request =>
-    val date = LocalDate.parse(dateStr, DateTimeFormatter.ofPattern("ddMMyyyy"))
-    val operations = Operation.list
-
-    val computedBalance = operations.filter{ op =>
-      op.accNum == account && op.date.compareTo(date) <= 0
-    }.foldLeft(0.0) { (balance, operation) =>
-      val amount = operation.opType match {
-        case "Credit" => operation.amount
-        case "Debit" => -(operation.amount)
-      }
-      println("Date : " + operation.date + " actual balance : " + balance + " amount to sum : " + amount )
-      balance + amount
-    }
-
     Ok(Json.toJson(computedBalance))
   }
 
-  def balanceByDate2(account: String, date: LocalDate) = {
-    val operations = Operation.list
+  def balanceByDate(account: String, date: LocalDate) = {
+    val operations = Operation.getList
 
     val computedBalance = operations.filter{ op =>
       op.accNum == account && op.date.compareTo(date) <= 0
-    }.foldLeft(0.0) { (balance, operation) =>
+    }.foldLeft(BigDecimal(0)) { (balance, operation) =>
       val amount = operation.opType match {
         case "Credit" => operation.amount
         case "Debit" => -(operation.amount)
       }
-      println("Date : " + operation.date + " actual balance : " + balance + " amount to sum : " + amount )
+      //println("Date : " + operation.date + " actual balance : " + balance + " amount to sum : " + amount )
       balance + amount
     }
-    computedBalance
+    computedBalance.setScale(2, RoundingMode.HALF_EVEN)
   }
 
 
+  def statement(account: String, from: String, to: String) = Action {
+    val operations = Operation.getList
 
-
-  def statement(account: String, from: String, to: String) = Action { request =>
-    val operations = Operation.list
-
-    val dateFrom = LocalDate.parse(from, DateTimeFormatter.ofPattern("ddMMyyyy"))
-    val dateTo = LocalDate.parse(to, DateTimeFormatter.ofPattern("ddMMyyyy"))
+    val dateFrom = LocalDate.parse(from, dateFormat)
+    val dateTo = LocalDate.parse(to, dateFormat)
 
     val data = operations.filter { op =>
-
-      //println("operation date : " + op.date + " dateFrom : " + dateFrom + " compare : " + op.date.compareTo(dateFrom))
-      //println("operation date : " + op.date + " dateTo : " + dateTo + " compare : " + op.date.compareTo(dateTo))
-      op.accNum == account &&
-        op.date.compareTo(dateFrom) >= 0 &&
-        op.date.compareTo(dateTo) <= 0
+      op.accNum == account && op.date.compareTo(dateFrom) >= 0 && op.date.compareTo(dateTo) <= 0
     }.groupBy(_.date).map {
       case (date, xs) => {
-        SimpleInfoByDate(date, xs.map(e => SimpleInfo(e.description, e.amount)), balanceByDate2(account, date))
+        SimpleInfoByDate(date, xs.map(e => SimpleInfo(e.description, e.amount.setScale(2, RoundingMode.HALF_EVEN))), balanceByDate(account, date))
       }
     }.toList.sortWith{ (op1, op2) => op1.date.compareTo(op2.date) <= 0 }
 
@@ -150,26 +85,35 @@ class HomeController @Inject()(cc:ControllerComponents) extends AbstractControll
   }
 
 
+  def debtPeriod(account: String) = Action {
+    val operations = Operation.getList
+
+    val result = operations.filter(_.accNum == account)
+      .groupBy( op => op.date)
+      .map {case (date, _) => date}
+      .toList.sortWith( (date1, date2) => date1.compareTo(date2) <= 0)
+      .map(date => Tuple2(date, balanceByDate(account, date))) // corrigir o nome da funcao balanceByDate
+      .sliding(2).filter{ p=>
+      //println("primeiro : " + p.lift(0).get._2 + "  Date : " + p.lift(0).get._1)
+      //println("segundo : " + p.lift(1).get._2 + "  Date : " + p.lift(1).get._1)
+
+      (p.lift(0).get._2 < 0 && p.lift(1).get._2 > 0) ||
+        (p.lift(0).get._2 < 0 && p.lift(1).get._2 < 0)
+    }
+      .flatten.grouped(2).toList
+
+    val lastBalance = result.last.last
+    //println("last balance  mesmo ? : " + lastBalance)
+
+    val finalResult = result.map{m =>
+      DebtPeriod(m(0)._1, Some(m(1)._1.minusDays(1)), m(0)._2) } :+ DebtPeriod(lastBalance._1, None, lastBalance._2)
+
+    Ok(Json.toJson(finalResult))
+
+  }
 
 
+  def test = Action { Ok("ok") }
 
-  // if we don't care about validation we could replace `validateJson[Place]`
-  // with `BodyParsers.parse.json[Place]` to get an unvalidated case class
-  // in `request.body` instead.
-/*  def savePlaceConcise = Action(validateJson[Reads[Place]]) { request =>
-    // `request.body` contains a fully validated `Place` instance.
-    //val place = request.body
-    //Place.save(place)
-
-    //Ok(Json.obj("status" ->"OK", "message" -> ("Place '"+place.name+"' saved.") ))
-
-    Ok(Json.obj("status" ->"OK", "message" -> ("Place '"+ "Qual eh o nome " +"' saved.") ))
-
-  }*/
-
-/*  def listPlaces = Action {
-    val json = Json.toJson(Place.list)
-    Ok(json)
-  }*/
 }
 

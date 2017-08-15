@@ -3,22 +3,21 @@
 # ~~~~
 
 
+
 # Operation
 
 #GET     /operation          controllers.HomeController.listOperations
-#POST    /operation          controllers.HomeController.saveOperation
+POST    /operation          controllers.HomeController.saveOperation
 
 # poderia fazer
 #POST   /operation/credit/:account
-
-GET     /balance2/:account/:date                           controllers.HomeController.balanceByDate(account: String, date: String)
-
 
 GET     /balance/:account                           controllers.HomeController.balance(account: String)
 #GET     /credit/:account                            controllers.HomeController.credit(account: String)
 #GET     /debit/:account                             controllers.HomeController.debit(account: String)
 GET     /statement/:account/:dateFrom/:dateTo       controllers.HomeController.statement(account: String, dateFrom: String, dateTo: String)
-#GET     /debt/:account                              controllers.HomeController.balance(account: String)
+
+GET     /debt/:account                              controllers.HomeController.debtPeriod(account: String)
 
 
 # Map static resources from the /public folder to the /assets URL path
