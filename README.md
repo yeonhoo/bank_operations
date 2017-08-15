@@ -1,29 +1,33 @@
 # README #
 
-This README would normally document whatever steps are necessary to get your application up and running.
+This is the solution for a exercise proposed by Nubank for software engineer position.
 
-### What is this repository for? ###
+## Main tools
 
-* Quick summary
-* Version
-* [Learn Markdown](https://bitbucket.org/tutorials/markdowndemo)
+* Playframework 2.6.2
+* Scala 2.12.2
+* sbt 0.13.15
 
-### How do I get set up? ###
+## Endpoints
 
-* Summary of set up
-* Configuration
-* Dependencies
-* Database configuration
-* How to run tests
-* Deployment instructions
+* POST /opertions
+    * Insert a new operation
+	* json payload format is like : {"op_type": "Credit", "account": "12345", "description": "deposit","amount": 200, "date": "2017-10-17"}
+	
+* GET /balance/:account
+    * Get the balance for the given "account"
 
-### Contribution guidelines ###
+* GET /statement/:account/:dateFrom/:dateTo
+    * Get the bank statement for the given "account" and the period that is specified by "dateFrom" and "dateTo" 
 
-* Writing tests
-* Code review
-* Other guidelines
+* GET /debt/:account
+    * Get debt period for the given "account" 
 
-### Who do I talk to? ###
+## Running 
 
-* Repo owner or admin
-* Other community or team contact
+    sbt run
+
+## Running the tests
+
+    sbt test
+
