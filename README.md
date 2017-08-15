@@ -88,28 +88,30 @@ This is the solution for a exercise proposed by Nubank for software engineer pos
     * input : /debt/12345
     
     * output : 
+    ```
 [
     {
-        "principal": -28.57,
+        "principal": 28.57,
         "start": "2017-10-18",
         "end": "2017-10-24"
     },
     {
-        "principal": -228.57,
+        "principal": 228.57,
         "start": "2017-10-30",
         "end": "2017-11-02"
     },
     {
-        "principal": -628.57,
+        "principal": 628.57,
         "start": "2017-11-03",
         "end": "2017-11-04"
     },
     {
-        "principal": -528.57,
+        "principal": 528.57,
         "start": "2017-11-05",
         "end": null
     }
 ]
+```
 
 ## Running 
 
