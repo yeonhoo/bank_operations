@@ -88,7 +88,7 @@ This is the solution for a exercise proposed by Nubank for software engineer pos
     * input : /debt/12345
     
     * output : 
-    ```
+:::javascript
 [
     {
         "principal": 28.57,
