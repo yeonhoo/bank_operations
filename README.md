@@ -25,7 +25,7 @@ This is the solution for a exercise proposed by Nubank for software engineer pos
     GET /balance/:account
 
 
-### Get the bank statement for the given "account" and the period that is specified by "dateFrom" and "dateTo" 
+### Get the bank statement for the given "account" and the period which is specified by "dateFrom" and "dateTo" 
     GET /statement/:account/:dateFrom/:dateTo
 
 ### Get debt period for the given "account" 
