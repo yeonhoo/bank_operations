@@ -74,7 +74,6 @@ object Operation {
   }
 
   def getList = list
-  def getList2 = list2
 
   private var list: List[Operation] = {
     List(
@@ -111,7 +110,7 @@ object Operation {
         "11111",
         "Withdrawal",
         200.00,
-        LocalDate.parse("17102017", DateTimeFormatter.ofPattern("ddMMyyyy"))
+        LocalDate.parse("16102017", DateTimeFormatter.ofPattern("ddMMyyyy"))
       ),
       Operation(
         "Debit",
@@ -188,81 +187,6 @@ object Operation {
         "Deposit",
         100.00,
         LocalDate.parse("05112017", DateTimeFormatter.ofPattern("ddMMyyyy"))
-      )
-    )
-  }
-
-  private var list2: List[Operation] = {
-    List(
-      Operation(
-        "Debit",
-        "12345",
-        "compra na amazon",
-        250.00,
-        LocalDate.parse("05082017", DateTimeFormatter.ofPattern("ddMMyyyy"))
-      ),
-      Operation(
-        "Debit",
-        "34567",
-        "deposito",
-        500.54,
-        LocalDate.parse("03082017", DateTimeFormatter.ofPattern("ddMMyyyy"))
-      ),
-      Operation(
-        "Credit",
-        "12345",
-        "deposito",
-        500.00,
-        LocalDate.parse("01082017", DateTimeFormatter.ofPattern("ddMMyyyy"))
-      ),
-      Operation(
-        "Credit",
-        "12345",
-        "deposito",
-        500.00,
-        LocalDate.parse("02082017", DateTimeFormatter.ofPattern("ddMMyyyy"))
-      ),
-      Operation(
-        "Credit",
-        "12345",
-        "deposito",
-        500.00,
-        LocalDate.parse("25072017", DateTimeFormatter.ofPattern("ddMMyyyy"))
-      ),
-      Operation(
-        "Debit",
-        "12345",
-        "transferencia",
-        2000.00,
-        LocalDate.parse("25072017", DateTimeFormatter.ofPattern("ddMMyyyy"))
-      ),
-      Operation(
-        "Debit",
-        "12345",
-        "transferencia",
-        2000.00,
-        LocalDate.parse("27072017", DateTimeFormatter.ofPattern("ddMMyyyy"))
-      ),
-      Operation(
-        "Debit",
-        "12345",
-        "transferencia",
-        15000.00,
-        LocalDate.parse("29072017", DateTimeFormatter.ofPattern("ddMMyyyy"))
-      ),
-      Operation(
-        "Debit",
-        "12345",
-        "transferencia",
-        15000.00,
-        LocalDate.parse("29072017", DateTimeFormatter.ofPattern("ddMMyyyy"))
-      ),
-      Operation(
-        "Debit",
-        "12345",
-        "transferencia",
-        15000.00,
-        LocalDate.parse("29072017", DateTimeFormatter.ofPattern("ddMMyyyy"))
       )
     )
   }

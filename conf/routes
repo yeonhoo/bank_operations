@@ -2,7 +2,6 @@ POST    /operation                                  controllers.HomeController.s
 GET     /balance/:account                           controllers.HomeController.balance(account: String)
 GET     /statement/:account/:dateFrom/:dateTo       controllers.HomeController.statement(account: String, dateFrom: String, dateTo: String)
 GET     /debt/:account                              controllers.HomeController.debtPeriod(account: String)
-GET     /debt2/:account                              controllers.HomeController.debtPeriod2(account: String)
 
 
 # Map static resources from the /public folder to the /assets URL path

@@ -38,19 +38,19 @@ class HomeController @Inject()(cc:ControllerComponents) extends AbstractControll
   def balance(account: String) = Action { request =>
 
     val operations = Operation.getList
-    //println(operations)
+
     val computedBalance = operations.filter(_.acc_num == account).foldLeft(BigDecimal(0)){ (balance, operation) =>
       val amount = operation.op_type match {
         case "Credit" => operation.amount
         case "Debit" => -(operation.amount)
       }
-      //println("Date : " + operation.date + " actual balance : " + balance + " amount to sum : " + amount )
       balance + amount
     }
     Ok(Json.toJson(computedBalance))
   }
 
   def balanceByDate(account: String, date: LocalDate) = {
+
     val operations = Operation.getList
 
     val computedBalance = operations.filter{ op =>
@@ -60,7 +60,6 @@ class HomeController @Inject()(cc:ControllerComponents) extends AbstractControll
         case "Credit" => operation.amount
         case "Debit" => -(operation.amount)
       }
-      //println("Date : " + operation.date + " actual balance : " + balance + " amount to sum : " + amount )
       balance + amount
     }
     computedBalance.setScale(2, RoundingMode.HALF_EVEN)
@@ -68,6 +67,7 @@ class HomeController @Inject()(cc:ControllerComponents) extends AbstractControll
 
 
   def statement(account: String, from: String, to: String) = Action {
+
     val operations = Operation.getList
     val dateFrom = LocalDate.parse(from, dateFormat)
     val dateTo = LocalDate.parse(to, dateFormat)
@@ -84,37 +84,24 @@ class HomeController @Inject()(cc:ControllerComponents) extends AbstractControll
   }
 
 
-  def debtPeriod2(account: String) = Action {
-    val operations = Operation.getList
+  def debtCalc(balanceByDate: List[(LocalDate, BigDecimal)]): Result = {
 
-    val result = operations.filter(_.acc_num == account)
-      .groupBy( op => op.date)
-      .map {case (date, _) => (date, balanceByDate(account, date))}
-      .toList.sortWith( (date1, date2) => date1._1.compareTo(date2._1) <= 0)
+    val intermCalc = balanceByDate.sortWith( (date1, date2) => date1._1.compareTo(date2._1) <= 0)
       .sliding(2).filter{ p=>
-        println("p.list 0 => " + p.lift(0) + "p.list 1 => " + p.lift(1))
-        println("p.list 0 => " + p.lift(0) + "p.list 1 getOrElse => " + p.lift(1))
-
       val firstBalance = p.lift(0).get._2
-        val secondBalance = p.lift(1).getOrElse(p.lift(0).get)._2
-        (firstBalance < 0 && secondBalance > 0) ||
+      val secondBalance = p.lift(1).get._2
+      (firstBalance < 0 && secondBalance > 0) ||
         (firstBalance < 0 && secondBalance < 0)
-      }.toList.
+    }.toList
 
-    println(result)
-
-    println("first El : " + result.lift(0))
-    //println("second El : " + result.lift(0).get.lift(1))
-
-
-    val debtPeriods = result.map { e =>
+    val debtPeriods = intermCalc.map { e =>
       val principal = e(0)._2.abs
       val startDate = e(0)._1
       val endDate = Some(e(1)._1.minusDays(1))
       DebtPeriod(principal, startDate, endDate)}
 
-    val lastBalance = result.last.last._2
-    val lastDeptStartDate = result.last.last._1
+    val lastBalance = intermCalc.last.last._2
+    val lastDeptStartDate = intermCalc.last.last._1
 
     val finalResult =
       if (lastBalance < 0)
@@ -124,29 +111,29 @@ class HomeController @Inject()(cc:ControllerComponents) extends AbstractControll
 
     Ok(Json.toJson(finalResult))
   }
+
   def debtPeriod(account: String) = Action {
+
     val operations = Operation.getList
 
     val result = operations.filter(_.acc_num == account)
       .groupBy( op => op.date)
-      .map {case (date, _) => date}
-      .toList.sortWith( (date1, date2) => date1.compareTo(date2) <= 0)
-      .map(date => Tuple2(date, balanceByDate(account, date))) // corrigir o nome da funcao balanceByDate
-      .sliding(2).filter{ p=>
-      //println("primeiro : " + p.lift(0).get._2 + "  Date : " + p.lift(0).get._1)
-      //println("segundo : " + p.lift(1).get._2 + "  Date : " + p.lift(1).get._1)
-      (p.lift(0).get._2 < 0 && p.lift(1).get._2 > 0) ||
-        (p.lift(0).get._2 < 0 && p.lift(1).get._2 < 0)
+      .map {case (date, _) => (date, balanceByDate(account, date))}.toList
+
+    if (result.length == 0) {
+      Ok("")
     }
-      .flatten.grouped(2).toList
-
-    val lastBalance = result.last.last
-    //println("last balance  mesmo ? : " + lastBalance)
-
-    val finalResult = result.map{m =>
-      DebtPeriod(m(0)._2.abs, m(0)._1, Some(m(1)._1.minusDays(1)) ) } :+ DebtPeriod(lastBalance._2.abs, lastBalance._1, None)
-
-    Ok(Json.toJson(finalResult))
+    else if (result.length == 1) {
+      if(result.lift(0).get._2 < 0) {
+        val principal = result.lift(0).get._2
+        val startDate = result.lift(0).get._1
+        val endDate = None
+        Ok(Json.toJson(DebtPeriod(principal, startDate, endDate)))}
+      else
+        Ok("")
+    }
+    else
+      debtCalc(result)
 
   }
 }
