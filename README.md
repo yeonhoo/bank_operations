@@ -34,7 +34,7 @@ This is the solution for a exercise proposed by Nubank for software engineer pos
 
 ## Endpoint request example
 
-* Test dataset is given as below 
+### Test dataset is given as below 
 ```
 #!scala
 private var list: List[Operation] = {
@@ -148,17 +148,15 @@ private var list: List[Operation] = {
   }
 ```
 
-* POST /opertions
-* request :
-    
+### Tests have been done on implemented Endpoints as below 
+
+* request : POST /opertions    
 ```
 #!json    
 {"op_type": "Credit", "account": "12345", "description": "deposit","amount": 200, "date": "2017-10-17"}
 ```
 
 * response :
-
-
 ```
 #!json
 {
@@ -167,14 +165,16 @@ private var list: List[Operation] = {
 }
 ```
 
-* GET /balance/:account
-    * request : /balance/12345
-    * response : -328.57
+* request : GET /balance/12345
+* response : 
+```
+#!json
+-328.57
+```
 
-* GET /statement/:account/:dateFrom/:dateTo
-    * request : /statement/12345/15102017/17102017
-    
-    * response : 
+* request : GET /statement/12345/15102017/17102017    
+* response : 
+
 ```
 #!json
 [
@@ -218,10 +218,9 @@ private var list: List[Operation] = {
     }
 ]
 ```
-* GET /debt/:account
-    * input : /debt/12345
-    
-    * response : 
+
+* request : GET /debt/12345
+* response : 
 ```
 #!json
 [
