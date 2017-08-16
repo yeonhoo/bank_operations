@@ -8,26 +8,34 @@ This is the solution for a exercise proposed by Nubank for software engineer pos
 * Scala 2.12.2
 * sbt 0.13.15
 
+## Running 
+
+    sbt run
+
+## Running the tests
+
+    sbt test
+
 ## Endpoints
 
 ### Insert a new operation
-#### POST /opertions
+    POST /opertions
 
 ### Get the balance for the given "account"
-#### GET /balance/:account
+    GET /balance/:account
 
 
-### Get the bank statement for the given "account" and the period that is specified by "dateFrom" and "dateTo" 
-#### GET /statement/:account/:dateFrom/:dateTo
+### Get the bank statement for the given "account" and the period which is specified by "dateFrom" and "dateTo" 
+    GET /statement/:account/:dateFrom/:dateTo
 
 ### Get debt period for the given "account" 
-#### GET /debt/:account
+    GET /debt/:account
 
 
 ## Endpoint request example
 
 * POST /opertions
-    * request :
+* request :
     
 ```
 #!json    
@@ -125,12 +133,4 @@ This is the solution for a exercise proposed by Nubank for software engineer pos
     }
 ]
 ```
-
-## Running 
-
-    sbt run
-
-## Running the tests
-
-    sbt test
 
