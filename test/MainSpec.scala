@@ -265,22 +265,51 @@ class HomeControllerSpec extends PlaySpec with GuiceOneAppPerTest {
     }
 
     "Return debit period for account 54321" in {
-      val request = FakeRequest(GET, "/debt/12345").withHeaders(HOST -> "localhost:9000",
+      val request = FakeRequest(GET, "/debt/54321").withHeaders(HOST -> "localhost:9000",
         "Content-type" -> "application/json")
       val apiResult = route(app, request).get
-      val validated = contentAsJson(apiResult).validate[List[DebtPeriod]]
+      val validated = contentAsJson(apiResult).validate[DebtPeriod]
 
       validated.isSuccess mustBe true
 
       val dateFormat = DateTimeFormatter.ofPattern("ddMMyyyy")
 
-      val firstElement = validated.get.lift(0).get
+      val firstElement = validated.get
 
       firstElement mustBe DebtPeriod(
-        28.57,
-        LocalDate.parse("18102017", dateFormat),
-        Some(LocalDate.parse("24102017", dateFormat)))
+        25.65,
+        LocalDate.parse("16102017", dateFormat),
+        None)
     }
+
+    "Return debit period for account 11111" in {
+      val request = FakeRequest(GET, "/debt/11111").withHeaders(HOST -> "localhost:9000",
+        "Content-type" -> "application/json")
+      val apiResult = route(app, request).get
+      val validated = contentAsJson(apiResult).validate[DebtPeriod]
+
+      validated.isSuccess mustBe true
+
+      val dateFormat = DateTimeFormatter.ofPattern("ddMMyyyy")
+
+      val firstElement = validated.get
+
+      firstElement mustBe DebtPeriod(
+        520,
+        LocalDate.parse("16102017", dateFormat),
+        None)
+    }
+
+    "Return debit period for account 22222" in {
+      val request = FakeRequest(GET, "/debt/22222").withHeaders(HOST -> "localhost:9000",
+        "Content-type" -> "application/json")
+      val apiResult = route(app, request).get
+
+      contentAsString(apiResult) mustBe empty
+
+    }
+
+
 
   }
 }

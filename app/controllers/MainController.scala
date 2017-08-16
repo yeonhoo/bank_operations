@@ -10,7 +10,7 @@ import models.Converters._
 import models._
 
 
-class HomeController @Inject()(cc:ControllerComponents) extends AbstractController(cc)  {
+class MainController @Inject()(cc:ControllerComponents) extends AbstractController(cc)  {
 
 
   def saveOperation = Action(parse.json) { request =>
@@ -134,7 +134,7 @@ class HomeController @Inject()(cc:ControllerComponents) extends AbstractControll
   * If there are more than one date on which operations were made, then call "debtCalc"
   * The reason I split up into two functions is while I was testing,
   * I found an error on edge case which I couldn't figure out how to solve generically,
-  * so I had to treat one by one and I think the code became ugly
+  * so I had to treat case by case and this led to ugly code.
   */
   def debtPeriod(account: String) = Action {
 
@@ -149,7 +149,7 @@ class HomeController @Inject()(cc:ControllerComponents) extends AbstractControll
     }
     else if (result.length == 1) {
       if(result.lift(0).get._2 < 0) {
-        val principal = result.lift(0).get._2
+        val principal = result.lift(0).get._2.abs
         val startDate = result.lift(0).get._1
         val endDate = None
         Ok(Json.toJson(DebtPeriod(principal, startDate, endDate)))}
@@ -158,7 +158,6 @@ class HomeController @Inject()(cc:ControllerComponents) extends AbstractControll
     }
     else
       debtCalc(result)
-
   }
 }
 

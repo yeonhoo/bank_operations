@@ -1,7 +1,7 @@
-POST    /operation                                  controllers.HomeController.saveOperation
-GET     /balance/:account                           controllers.HomeController.balance(account: String)
-GET     /statement/:account/:dateFrom/:dateTo       controllers.HomeController.statement(account: String, dateFrom: String, dateTo: String)
-GET     /debt/:account                              controllers.HomeController.debtPeriod(account: String)
+POST    /operation                                  controllers.MainController.saveOperation
+GET     /balance/:account                           controllers.MainController.balance(account: String)
+GET     /statement/:account/:dateFrom/:dateTo       controllers.MainController.statement(account: String, dateFrom: String, dateTo: String)
+GET     /debt/:account                              controllers.MainController.debtPeriod(account: String)
 
 
 # Map static resources from the /public folder to the /assets URL path
