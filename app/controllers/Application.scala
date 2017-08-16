@@ -12,6 +12,7 @@ import models._
 
 class HomeController @Inject()(cc:ControllerComponents) extends AbstractController(cc)  {
 
+
   def saveOperation = Action(parse.json) { request =>
     val operationResult = request.body.validate[Operation](operationReads)
     operationResult.fold(
@@ -35,6 +36,9 @@ class HomeController @Inject()(cc:ControllerComponents) extends AbstractControll
     Ok(json)
   }
 
+  /**
+    * Sum all amounts from operations of the given account
+    */
   def balance(account: String) = Action { request =>
 
     val operations = Operation.getList
@@ -49,6 +53,9 @@ class HomeController @Inject()(cc:ControllerComponents) extends AbstractControll
     Ok(Json.toJson(computedBalance))
   }
 
+  /**
+    * Sum all amounts from operations of the given account until the provided date
+    */
   def balanceByDate(account: String, date: LocalDate) = {
 
     val operations = Operation.getList
@@ -65,7 +72,11 @@ class HomeController @Inject()(cc:ControllerComponents) extends AbstractControll
     computedBalance.setScale(2, RoundingMode.HALF_EVEN)
   }
 
-
+  /**
+    * Selects only the operations of the given account and period,
+    * groups by date and calculates the balance of each date
+    * and sorts by date
+    */
   def statement(account: String, from: String, to: String) = Action {
 
     val operations = Operation.getList
@@ -83,7 +94,14 @@ class HomeController @Inject()(cc:ControllerComponents) extends AbstractControll
     Ok(Json.toJson(data))
   }
 
-
+  /**
+    * Given the list grouped by date, it is sorted by date
+    * and applies sliding windows of size 2 over original sequence,
+    * and filters only the elements that represent the debt period.
+    *
+    * Lastly, if the balance is negative,
+    * that means the debt period with no ending date(None) is appended to the debt periods.
+    */
   def debtCalc(balanceByDate: List[(LocalDate, BigDecimal)]): Result = {
 
     val intermCalc = balanceByDate.sortWith( (date1, date2) => date1._1.compareTo(date2._1) <= 0)
@@ -111,7 +129,13 @@ class HomeController @Inject()(cc:ControllerComponents) extends AbstractControll
 
     Ok(Json.toJson(finalResult))
   }
-
+/**
+  * All operations are initially grouped by date for the given account
+  * If there are more than one date on which operations were made, then call "debtCalc"
+  * The reason I split up into two functions is while I was testing,
+  * I found an error on edge case which I couldn't figure out how to solve generically,
+  * so I had to treat one by one and I think the code became ugly
+  */
   def debtPeriod(account: String) = Action {
 
     val operations = Operation.getList

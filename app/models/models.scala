@@ -147,7 +147,6 @@ object Operation {
         180.00,
         LocalDate.parse("17102017", DateTimeFormatter.ofPattern("ddMMyyyy"))
       ),
-
       Operation(
         "Debit",
         "12345",
@@ -155,16 +154,13 @@ object Operation {
         800.00,
         LocalDate.parse("18102017", DateTimeFormatter.ofPattern("ddMMyyyy"))
       ),
-
       Operation(
         "Credit",
         "12345",
         "Deposit",
         100.00,
         LocalDate.parse("25102017", DateTimeFormatter.ofPattern("ddMMyyyy"))
-      )
-      ,
-
+      ),
       Operation(
         "Debit",
         "12345",
@@ -172,7 +168,6 @@ object Operation {
         300.00,
         LocalDate.parse("30102017", DateTimeFormatter.ofPattern("ddMMyyyy"))
       ),
-
       Operation(
         "Debit",
         "12345",
@@ -180,7 +175,6 @@ object Operation {
         400.00,
         LocalDate.parse("03112017", DateTimeFormatter.ofPattern("ddMMyyyy"))
       ),
-
       Operation(
         "Credit",
         "12345",
