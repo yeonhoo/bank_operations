@@ -104,6 +104,11 @@ class MainController @Inject()(cc:ControllerComponents) extends AbstractControll
     */
   def debtCalc(balanceByDate: List[(LocalDate, BigDecimal)]): Result = {
 
+    val intermm = balanceByDate.sortWith( (date1, date2) => date1._1.compareTo(date2._1) <= 0)
+      .sliding(2)
+
+    println(intermm.toList)
+
     val intermCalc = balanceByDate.sortWith( (date1, date2) => date1._1.compareTo(date2._1) <= 0)
       .sliding(2).filter{ p=>
       val firstBalance = p.lift(0).get._2
@@ -132,22 +137,22 @@ class MainController @Inject()(cc:ControllerComponents) extends AbstractControll
 /**
   * All operations are initially grouped by date for the given account
   * If there are more than one date on which operations were made, then call "debtCalc"
-  * The reason I split up into two functions is while I was testing,
-  * I found an error on edge case which I couldn't figure out how to solve generically,
-  * so I had to treat case by case and this led to ugly code.
+  * The reason I split up into two functions => FIX
   */
   def debtPeriod(account: String) = Action {
 
     val operations = Operation.getList
 
     val result = operations.filter(_.acc_num == account)
-      .groupBy( op => op.date)
+      .groupBy( _.date)
       .map {case (date, _) => (date, balanceByDate(account, date))}.toList
 
-    if (result.length == 0) {
+    println("result  => " + result)
+
+    if (result.length == 0) { // nao existe nenhuma operacao realizada dessa conta
       Ok("")
     }
-    else if (result.length == 1) {
+    else if (result.length == 1) { // existe uma data em que a/as operacoes foram realizadas
       if(result.lift(0).get._2 < 0) {
         val principal = result.lift(0).get._2.abs
         val startDate = result.lift(0).get._1

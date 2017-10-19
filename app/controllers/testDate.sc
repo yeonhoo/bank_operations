@@ -1,6 +1,7 @@
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
+import models.{DebtPeriod, Operation}
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
 
@@ -231,30 +232,51 @@ def debt(account: String) = {
 
 debt("12345")
 
-def statement(account: String, dateFrom: LocalDate, dateTo: LocalDate) = {
-  val operations = Operation.list
 
-  val data = operations.filter { op =>
+def debtCalc(balanceByDate: List[(LocalDate, BigDecimal)]) = {
 
-    //println("operation date : " + op.date + " dateFrom : " + dateFrom + " compare : " + op.date.compareTo(dateFrom))
-    //println("operation date : " + op.date + " dateTo : " + dateTo + " compare : " + op.date.compareTo(dateTo))
-    op.accNum == account &&
-      op.date.compareTo(dateFrom) >= 0 &&
-      op.date.compareTo(dateTo) <= 0
-  }.groupBy(_.date).map {
-    case (date, xs) => {
-      SimpleInfoByDate(date, xs.map(e => SimpleInfo(e.description, e.amount)))
-    }
-  }.toList.sortWith{ (op1, op2) => op1.date.compareTo(op2.date) <= 0 }
+  val intermCalc = balanceByDate.sortWith( (date1, date2) => date1._1.compareTo(date2._1) <= 0)
+    .sliding(2).filter{ p=>
+    val firstBalance = p.lift(0).get._2
+    val secondBalance = p.lift(1).get._2
+    (firstBalance < 0 && secondBalance > 0) ||
+      (firstBalance < 0 && secondBalance < 0)
+  }.toList
 
+  val debtPeriods = intermCalc.map { e =>
+    val principal = e(0)._2.abs
+    val startDate = e(0)._1
+    val endDate = Some(e(1)._1.minusDays(1))
+    DebtPeriod(principal, startDate, endDate)}
 
-  val transformedData = Json.toJson(data)
-  transformedData
+  val lastBalance = intermCalc.last.last._2
+  val lastDeptStartDate = intermCalc.last.last._1
+
+  val finalResult =
+    if (lastBalance < 0)
+      debtPeriods :+ DebtPeriod(lastBalance.abs, lastDeptStartDate, None)
+    else
+      debtPeriods
+
+  (finalResult)
 }
 
+def debtPeriod(account: String) = {
 
+  val operations = Operation.getList
 
-val process = statement("12345",
-  LocalDate.parse("01/05/2017", DateTimeFormatter.ofPattern("dd/MM/yyyy")),
-  LocalDate.parse("10/08/2017", DateTimeFormatter.ofPattern("dd/MM/yyyy"))
-)
+  val result = operations.filter(_.acc_num == account)
+    .groupBy( _.date)
+    .map {case (date, _) => (date, balanceByDate(account, date))}.toList
+
+  println("result  => " + result)
+
+  //
+  /**
+    * loop from 0 to list.length - 2
+    * if element.balance < 0 //starts debt period
+    *   DebtPeriod(element.date, element(+1).date, element.date)
+    */
+
+}
+

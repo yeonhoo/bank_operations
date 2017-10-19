@@ -1,6 +1,6 @@
 # README #
 
-This is the solution for a exercise proposed by Nubank for software engineer position.
+Small set of bank operations written in Scala
 
 ## Main tools
 
