@@ -12,7 +12,6 @@ import models._
 
 class MainController @Inject()(cc:ControllerComponents) extends AbstractController(cc)  {
 
-
   def saveOperation = Action(parse.json) { request =>
     val operationResult = request.body.validate[Operation](operationReads)
     operationResult.fold(

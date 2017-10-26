@@ -1,12 +1,87 @@
-# README #
+## Introduction
+Small set of bank operations(deposits, withdrawals, statement, charge interest) written in Scala. This handles transactions in a concurrent-safe way.
 
-Small set of bank operations written in Scala
+A checking account from a bank allows for putting (deposits, salaries, credits)
+or taking (purchases, withdrawals, debits) money at any given time.
+
+You can also check what is your current balance or your account statement,
+containing all operations that happened between two dates, along with the
+account's daily balance.
+
+While you should only be able to take an amount of money that was put there
+previously, some banks give you a "free" credit line, so it can lend you some
+money instantly, at a "reasonable" interest rate.
 
 ## Main tools
 
 * Playframework 2.6.2
 * Scala 2.12.2
 * sbt 0.13.15
+
+## Implemented operations
+ 
+    
+#### 1) Add operations into the checking account    
+
+Add an operation to a given checking account, identified by : account number, description, amount, date
+Deposits can take days to be acknowledged properly, this means the dates might not be ordered as operations are inserted.
+
+E.g:
+
+    Deposit 1000.00 at 15/10
+    Purchase on Amazon 3.34 at 16/10
+    Purchase on Uber 45.23 at 16/10
+    Withdrawal 180.00 at 17/10
+ 
+#### 2) Get the current balance
+
+Create a HTTP endpoint which returns the current balance of a given account.
+  This balance is the sum of all operations until today, so the customer can
+  know how much money they still have.
+
+E.g: for the sample above, the customer would have
+     
+    1000.00 - 3.34 - 45.23 - 180.00 = 771.43
+    
+#### 3) Get the bank statement
+
+Returns the bank statement of a period of dates.
+  This statement will contain the operations of each day and the balance at the
+  end of each day.
+  
+E.g:
+    
+    15/10:
+    - Deposit 1000.00
+    Balance: 1000.00
+  
+    16/10:
+    - Purchase on Amazon 3.34
+    - Purchase on Uber 45.23
+    Balance: 951.43
+  
+    17/10:
+    - Withdrawal 180.00
+    Balance: 771.43
+  
+#### 4) Compute period of debt
+
+Returns the periods which the account's balance was negative, i.e, periods when the bank can charge interest on that account.
+
+
+  E.g: if we have two more operations (current balance is 771.43):
+  
+    Purchase of a flight ticket 800.00 at 18/10
+    Deposit 100.00 at 25/10
+
+The endpoint would return:
+   
+    - Principal: 28.57
+    Start: 18/10
+    End: 24/10
+
+  This endpoint should return multiple periods, if applicable, and omit the "End:"
+  date if the account's balance is currently negative.
 
 ## Running 
 
@@ -17,6 +92,8 @@ Small set of bank operations written in Scala
     sbt test
 
 ## Endpoints
+
+All HTTP endpoints accept and return JSON payloads as requests and responses. There is no HTML visualizations.
 
 ### Insert a new operation
     POST /opertions
@@ -150,7 +227,7 @@ private var list: List[Operation] = {
 
 ### Tests have been done on implemented Endpoints as below 
 
-* request : POST /opertions    
+* request : POST /operation 
 ```
 #!json    
 {"op_type": "Credit", "account": "12345", "description": "deposit","amount": 200, "date": "2017-10-17"}
